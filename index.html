@@ -1,0 +1,1738 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Journal Caisse U-GAME</title>
+  <style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+    }
+
+    table {
+        width: 100%;
+        max-width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    td, th {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+        min-width: 0;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    input[readonly] {
+        background-color: #eceff1;
+        border: none;
+        width: 100%;
+    }
+
+    .total-row {
+        border-top: 3px solid #388E3C;
+        border-bottom: 3px solid #388E3C;
+        background-color: #e0f7fa;
+        font-weight: bold;
+    }
+
+    tfoot tr:not(.total-row) {
+        background-color: #fff3e0;
+    }
+
+    button {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    button:hover {
+        background-color: #1976D2;
+    }
+
+    .warning {
+        color: red;
+        font-size: 0.9em;
+    }
+
+    
+
+/* Canvas-style background for cumulative total */
+.cumulative-total {
+  background: repeating-conic-gradient(from 45deg, #f5f5f5 0deg 10deg, #e0f7fa 10deg 20deg);
+  color: #2e7d32;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 25px;
+  border-radius: 20px;
+  margin: 30px auto;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateX(3deg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cumulative-total:hover {
+  transform: perspective(1000px) rotateX(0deg);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+
+
+    .depense-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
+        min-width: 0;
+    }
+
+    .controls {
+        padding: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+    }
+
+    .controls label, 
+    .controls select, 
+    .controls input[type="number"] {
+        margin: 0 5px;
+    }
+
+    #journalTable {
+        margin: 0 auto;
+        width: 100%;
+        table-layout: auto;
+    }
+
+    h2 {
+        padding: 10px;
+        text-align: center;
+        color: #333;
+        margin: 0;
+    }
+
+    .button-container {
+        padding: 05px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 05px;
+       neurodivergent justify-content: center;
+    }
+
+    @media print {
+        .no-print {
+            display: none;
+        }
+    }
+
+    /* Login Styles */
+    #loginContainer, #manageUsersContainer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    }
+
+    .login-box, .manage-users-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 350px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    .login-title, .manage-users-title {
+        color: #4CAF50;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+    }
+
+    .login-input, .manage-users-input {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+
+    .login-btn, .manage-users-btn {
+        width: 100%;
+        padding: 10px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .login-btn:hover, .manage-users-btn:hover {
+        background: #45a049;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* Style pour input number */
+    input[type="text"].number-input {
+        text-align: right;
+        width: 100px;
+    }
+
+    /* Responsive Adjustments */
+    @media screen and (max-width: 768px) {
+        td, th {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+
+        .controls {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        
+
+/* Canvas-style background for cumulative total */
+.cumulative-total {
+  background: repeating-conic-gradient(from 45deg, #f5f5f5 0deg 10deg, #e0f7fa 10deg 20deg);
+  color: #2e7d32;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 25px;
+  border-radius: 20px;
+  margin: 30px auto;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateX(3deg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cumulative-total:hover {
+  transform: perspective(1000px) rotateX(0deg);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+
+
+        h2 {
+            font-size: 1.0em;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        td, th {
+            font-size: 12px;
+            padding: 4px;
+        }
+
+        .depense-container {
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        button {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .button-container {
+            flex-direction: column;
+        }
+    }
+  
+button {
+  background: linear-gradient(to bottom, #4CAF50, #388E3C);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  box-shadow: 0 4px #2e7d32;
+  transition: all 0.2s ease;
+}
+
+button:active {
+  box-shadow: 0 2px #2e7d32;
+  transform: translateY(2px);
+}
+
+button:hover {
+  background: linear-gradient(to bottom, #66BB6A, #43A047);
+}
+
+button[style*="background-color: #f44336"] {
+  background: linear-gradient(to bottom, #f44336, #d32f2f);
+  box-shadow: 0 4px #b71c1c;
+}
+
+button[style*="background-color: #f44336"]:active {
+  box-shadow: 0 2px #b71c1c;
+  transform: translateY(2px);
+}
+
+button[style*="background-color: #f44336"]:hover {
+  background: linear-gradient(to bottom, #e57373, #c62828);
+}
+
+
+table {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+th {
+  background: linear-gradient(to bottom, #4CAF50, #388E3C);
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px #2e7d32;
+}
+
+td {
+  background: white;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+  transform: scale(1.005);
+  transition: transform 0.2s ease;
+}
+
+
+/* 3D Canvas-style button */
+.canvas-button {
+  position: relative;
+  display: inline-block;
+  padding: 4px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(to bottom right, #4CAF50, #2e7d32);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 6px #1b5e20;
+  transition: all 0.2s ease;
+  transform: perspective(600px) rotateX(10deg);
+}
+
+.canvas-button:hover {
+  background: linear-gradient(to bottom right, #66BB6A, #43A047);
+  transform: perspective(600px) rotateX(0deg);
+}
+
+.canvas-button:active {
+  box-shadow: 0 2px #1b5e20;
+  transform: perspective(600px) rotateX(2deg) translateY(4px);
+}
+
+
+/* Gradient animated title */
+.animated-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  background: linear-gradient(-45deg, #4CAF50, #66BB6A, #81C784, #A5D6A7);
+  background-size: 600% 600%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientText 5s ease infinite;
+  text-align: center;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  margin-bottom: 10px;
+}
+
+@keyframes gradientText {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+/* 3D Effect Table Styling */
+#journalTable {
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateX(2deg);
+  transition: all 0.3s ease-in-out;
+}
+
+#journalTable:hover {
+  transform: perspective(1000px) rotateX(0deg);
+}
+
+#journalTable th {
+  background: linear-gradient(to bottom, #388E3C, #FFFFFF);
+  color: white;
+  font-size: 16px;
+  text-shadow: 1px 1px 2px #000;
+  padding: 10px;
+}
+
+#journalTable td {
+  background-color: #ffffff;
+  padding: 5px;
+  transition: background-color 0.2s ease;
+}
+
+#journalTable tr:hover td {
+  background-color: #f1f1f1;
+}
+
+
+
+/* 3D Style for Percentage Labels - RED THEME */
+.percent-label {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #b71c1c;
+  background: linear-gradient(to bottom, #ffcdd2, #ef9a9a);
+  padding: 4px 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  transform: perspective(800px) rotateX(3deg);
+  transition: all 0.3s ease;
+}
+
+.percent-label:hover {
+  transform: perspective(800px) rotateX(0deg);
+  background: linear-gradient(to bottom, #ef9a9a, #e57373);
+}
+
+
+/* 3D Style for Money Labels */
+.money-value {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #1b5e20;
+  background: linear-gradient(to bottom, #dcedc8, #c5e1a5);
+  padding: 4px 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  transform: perspective(1000px) rotateX(2deg);
+  transition: all 0.3s ease;
+}
+
+.money-value:hover {
+  transform: perspective(1000px) rotateX(0deg);
+  background: linear-gradient(to bottom, #aed581, #9ccc65);
+}
+
+
+/* Enhanced TOTAL label */
+.total-highlight {
+  font-size: 1.4em;
+  font-weight: bold;
+  background: linear-gradient(to right, #ff8a65, #ff7043, #ff5722);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+  letter-spacing: 1px;
+  animation: totalGlow 3s infinite alternate;
+}
+
+@keyframes totalGlow {
+  0% { text-shadow: 0 0 5px #ff8a65; }
+  100% { text-shadow: 0 0 20px #ff5722; }
+}
+
+
+/* Elevated 3D summary section */
+
+
+/* Canvas-style background for cumulative total */
+.cumulative-total {
+  background: repeating-conic-gradient(from 45deg, #f5f5f5 0deg 10deg, #e0f7fa 10deg 20deg);
+  color: #2e7d32;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 20px;
+  margin: 30px auto;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateX(3deg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cumulative-total:hover {
+  transform: perspective(1000px) rotateX(0deg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+
+
+
+/* Centered input for 'Votre Libellé' */
+.depense-container input[type="text"]:not(.number-input) {
+  text-align: center;
+  width: 100%;
+  max-width: 140px;
+  font-style: italic;
+}
+
+
+/* Keyframes for rotating background */
+@keyframes rotateBackground {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Add rotating background using pseudo-element */
+.cumulative-total {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  color: #2e7d32;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 25px;
+  border-radius: 20px;
+  margin: 30px auto;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  background: transparent;
+}
+
+.cumulative-total::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: repeating-conic-gradient(from 45deg, #f5f5f5 0deg 10deg, #e0f7fa 10deg 20deg);
+  animation: rotateBackground 20s linear infinite;
+  z-index: 0;
+}
+
+.cumulative-total > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Container for perimeter canvas stroke */
+.canvas-button.perimeter-effect {
+  position: relative;
+  background: linear-gradient(to bottom right, #4CAF50, #2e7d32);
+  color: white;
+  padding: 8px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px #1b5e20;
+  z-index: 0;
+}
+
+
+/* Content always above perimeter effect */
+.canvas-button.perimeter-effect > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* SVG animated border */
+.canvas-button.perimeter-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: none;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 12px;
+  mask-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="12" ry="12" fill="none" stroke="white" stroke-width="4" stroke-dasharray="40, 17, 40, 17, 40, 17, 40, 17, 40, 17, 40, 17, 40, 17" stroke-dashoffset="0"><animate attributeName="stroke-dashoffset" from="0" to="-100" dur="2s" repeatCount="indefinite" /></rect></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="12" ry="12" fill="none" stroke="white" stroke-width="4" stroke-dasharray="40, 17, 40, 17, 40, 17, 40, 17, 40, 17, 40, 17, 40, 17" stroke-dashoffset="0"><animate attributeName="stroke-dashoffset" from="0" to="-100" dur="2s" repeatCount="indefinite" /></rect></svg>');
+  background-color: white;
+  opacity: 0.4;
+}
+
+
+/* Smoke-like puff effect on click */
+@keyframes puff {
+  0% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    box-shadow: 0 0 80px rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+.canvas-button.perimeter-effect.smoke {
+  animation: puff 0.6s ease-out forwards;
+}
+
+
+/* Position the logout button more to the right */
+.logout-spaced {
+  margin-left: auto;
+  background-color: #f44336 !important;
+}
+
+
+.logout-spaced {
+  margin-left: auto;
+  background: linear-gradient(to bottom right, #FFB74D, #F57C00) !important;
+  box-shadow: 0 6px #E65100 !important;
+}
+
+
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    @media screen and (max-width: 768px) {
+      td, th {
+        padding: 6px;
+        font-size: 13px;
+      }
+      button {
+        padding: 4px 10px;
+        font-size: 13px;
+      }
+      .controls, .button-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      td, th {
+        font-size: 12px;
+        padding: 4px;
+      }
+      button {
+        width: 100%;
+        margin: 5px 0;
+        font-size: 12px;
+        padding: 4px 10px;
+      }
+      .controls, .button-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+</style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+@keyframes clignote {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.flash-text {
+  animation: clignote 1s infinite;
+}
+</style>
+<audio id="fireworksSound" src="https://www.soundjay.com/explosion/explosion-01.mp3" preload="auto"></audio>
+</head>
+<body style="background-color: #E3F2FD;">
+  <!-- Écran de connexion -->
+  <div id="loginContainer">
+    <div class="login-box">
+      <h2 class="login-title">Journal U-G</h2>
+      <form id="loginForm">
+        <input type="text" id="loginUsername" class="login-input" placeholder="Nom d'utilisateur" required>
+        <input type="password" id="loginPassword" class="login-input" placeholder="Mot de passe" required>
+        <button type="submit" class="login-btn">Connexion</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interface de gestion des utilisateurs -->
+  <div id="manageUsersContainer" class="hidden">
+    <div class="manage-users-box">
+      <h2 class="manage-users-title">Gestion des Utilisateurs</h2>
+      <form id="manageUsersForm">
+        <select id="userSelect" class="manage-users-input" required>
+          <option value="">Choisir un utilisateur</option>
+          <option value="admin">admin</option>
+          <option value="caissier">caissier</option>
+        </select>
+        <input type="text" id="newUsername" class="manage-users-input" placeholder="Nouveau nom d'utilisateur">
+        <input type="password" id="newPassword" class="manage-users-input" placeholder="Nouveau mot de passe">
+        <button type="submit" class="manage-users-btn">Modifier</button>
+        <button type="button" class="manage-users-btn" onclick="closeManageUsers()" style="background-color: #f44336;">Fermer</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div id="appContent" class="hidden">
+    <h2 class="animated-title">Journal U-G</h2>
+
+    <div class="controls no-print">
+      <label for="moisSelect">Mois: </label>
+      <select id="moisSelect" onchange="changeMonth()">
+        <option value="0">Janvier</option>
+        <option value="1">Février</option>
+        <option value="2">Mars</option>
+        <option value="3">Avril</option>
+        <option value="4">Mai</option>
+        <option value="5">Juin</option>
+        <option value="6">Juillet</option>
+        <option value="7">Août</option>
+        <option value="8">Septembre</option>
+        <option value="9">Octobre</option>
+        <option value="10">Novembre</option>
+        <option value="11">Décembre</option>
+      </select>
+      
+      <label for="anneeInput">Année: </label>
+      <input type="number" id="anneeInput" value="2025" min="2000" max="2100" onchange="changeMonth()">
+      
+      
+<button class="canvas-button" style="background: linear-gradient(to bottom right, #FFB74D, #F57C00); box-shadow: 0 6px #E65100;" onclick="restaurerCompte()">Restaurer</button>
+
+      <button class="canvas-button perimeter-effect" onclick="openManageUsers()">Gérer Utilisateurs</button>
+    </div>
+    
+    <div class="table-container">
+<table id="journalTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Mois</th>
+          <th>Jour</th>
+          <th>Jeux</th>
+          <th>Wifi</th>
+          <th>Dépense</th>
+          <th class="no-print">Action</th>
+        </tr>
+      </thead>
+      <tbody id="journalBody">
+        <!-- Lignes ajoutées ici -->
+      </tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td style="border: 2px solid #388E3C; font-weight: bold;" colspan="3"><span class="total-highlight">TOTAL</span></td>
+          <td style="border: 2px solid #388E3C; font-weight: bold;" id="totalCell">0</td>
+          <td style="border: 2px solid #388E3C; font-weight: bold;" id="totalAutreRevenue">0</td>
+          <td style="border: 2px solid #388E3C; font-weight: bold;" id="totalDepense">0</td>
+          <td style="border: 2px solid #388E3C; font-weight: bold;" class="no-print"></td>
+        </tr>
+        
+      </tfoot>
+    </table>
+</div>
+    
+    
+    <div style="margin: 20px 0; padding: 0 10px;">
+      <table style="width: 100%; border: 1px solid #4CAF50; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <thead style="background-color: #C8E6C9;">
+          <tr>
+            <th colspan="7" style="padding: 10px; text-align: center; font-size: 18px; color: #FFFFFF;">RÉPARTITION POURCENTAGES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+          <td colspan="3"><span class="percent-label">Jeux 30%</span> :</td>
+          <td id="percent30">0</td>
+          <td></td>
+          <td class="no-print"></td>
+        </tr>
+        <tr>
+          <td colspan="3"><span class="percent-label">Murielle(Poussy)30%</span> :</td>
+          <td id="percent30Second">0</td>
+          <td></td>
+          <td class="no-print"></td>
+        </tr>
+        <tr>
+          <td colspan="3"><span class="percent-label">Santatra 15%</span> :</td>
+          <td id="percent15">0</td>
+          <td></td>
+          <td class="no-print"></td>
+        </tr>
+          <tr>
+          <td colspan="3"><span class="percent-label">Samba 15%</span> :</td>
+          <td id="percent15Second">0</td>
+          <td></td>
+          <td class="no-print"></td>
+        </tr>
+        <tr>
+          <td colspan="3"><span class="percent-label">10%</span> :</td>
+          <td id="percent10">0</td>
+          <td></td>
+          <td class="no-print"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    
+<div class="cumulative-total">
+<style>
+.cumulative-total {
+  position: relative;
+  z-index: 1;
+}
+
+.cumulative-total .spinner-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cumulative-total svg {
+  width: 100%;
+  height: 100%;
+}
+
+
+@keyframes rotate-dot {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -400;
+  }
+}
+
+.cumulative-total > * {
+  position: relative;
+  z-index: 2;
+}
+</style>
+
+
+
+<div class="spinner-border">
+  <svg>
+    <defs>
+      <linearGradient id="rainbowStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="red"/>
+        <stop offset="16.6%" stop-color="orange"/>
+        <stop offset="33.3%" stop-color="yellow"/>
+        <stop offset="50%" stop-color="green"/>
+        <stop offset="66.6%" stop-color="blue"/>
+        <stop offset="83.3%" stop-color="indigo"/>
+        <stop offset="100%" stop-color="violet"/>
+      </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)"
+      fill="none"
+      stroke="url(#rainbowStroke)"
+      stroke-width="4"
+      stroke-dasharray="40, 17, 40, 17, 40, 17, 40, 17, 40, 17, 40, 17, 40, 17"
+      stroke-dashoffset="0"
+      rx="20"
+      ry="20"
+      style="animation: rotate-dot 2s linear infinite;" />
+  </svg>
+</div>
+
+
+
+      <span>Total 10% :</span>
+      <span id="cumulativePercent10" class="money-value">0</span>
+      <br> <br>
+      <span>Vola Jeux Restant :</span>
+      <span id="totalVola" class="money-value">0</span>
+      <br><br>
+      <span>Total Vola(jeux) :</span>
+      <span id="totalVola2" class="money-value">0</span>
+    </div>
+    <div class="button-container no-print">
+      <button class="canvas-button perimeter-effect" onclick="ajouterLigne()">Jour Suivant</button>
+      <button class="canvas-button" onclick="enregistrerPDF()">Enregistrer en PDF</button>
+      <button class="canvas-button" onclick="imprimer()">Imprimer</button>
+      <button class="canvas-button logout-spaced" onclick="logout()">Déconnexion</button>
+    </div> 
+  </div>
+
+  <script>
+    // =============================================
+    // GESTION AUTHENTIFICATION
+    // =============================================
+    const STORAGE_KEY_PREFIX = "journal_caisse_";
+    const USER_STORAGE_KEY = "app_users";
+    const moisList = [
+      "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ];
+
+    // Charger ou initialiser les utilisateurs
+    let APP_USERS = JSON.parse(localStorage.getItem(USER_STORAGE_KEY)) || {
+      "admin": {
+        password: "admin123",
+        permissions: {
+          view: true,
+          add: true,
+          delete: true,
+          export: true,
+          restore: true,
+          print: true,
+          manageUsers: true
+        }
+      },
+      "caissier": {
+        password: "caissier123",
+        permissions: {
+          view: true,
+          add: true,
+          delete: false,
+          export: false,
+          restore: false,
+          print: true,
+          manageUsers: false
+        }
+      }
+    };
+
+    // Sauvegarder les utilisateurs dans localStorage
+    function saveUsers() {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(APP_USERS));
+    }
+
+    // Vérification de la session au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser && APP_USERS[savedUser]) {
+        initApp(savedUser);
+      }
+    });
+
+    // Gestion de la connexion
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (APP_USERS[username] && APP_USERS[username].password === password) {
+        localStorage.setItem('currentUser', username);
+        initApp(username);
+      } else {
+        alert("Accès refusé : Identifiants incorrects");
+      }
+    });
+
+    // Initialisation de l'application
+    function initApp(username) {
+      document.getElementById('loginContainer').classList.add('hidden');
+      document.getElementById('appContent').classList.remove('hidden');
+
+      const user = APP_USERS[username];
+      document.querySelector('h2').textContent = `Journal U-G (${username})`;
+
+      if (!user.permissions.restore) {
+        document.querySelector('button[onclick="restaurerCompte()"]').style.display = 'none';
+      }
+      if (!user.permissions.export) {
+        document.querySelector('button[onclick="enregistrerPDF()"]').style.display = 'none';
+      }
+      if (!user.permissions.manageUsers) {
+        document.querySelector('button[onclick="openManageUsers()"]').style.display = 'none';
+      }
+
+      const now = new Date();
+      document.getElementById('moisSelect').value = now.getMonth();
+      document.getElementById('anneeInput').value = now.getFullYear();
+      loadData();
+    }
+
+    // Vérification des permissions
+    function checkPermission(permission) {
+      const user = localStorage.getItem('currentUser');
+      if (!user || !APP_USERS[user] || !APP_USERS[user].permissions[permission]) {
+        alert("Action non autorisée");
+        return false;
+      }
+      return true;
+    }
+
+    // Déconnexion
+    function logout() {
+      localStorage.removeItem('currentUser');
+      location.reload();
+    }
+
+    // Gestion des utilisateurs
+    function openManageUsers() {
+      if (!checkPermission('manageUsers')) return;
+      document.getElementById('manageUsersContainer').classList.remove('hidden');
+    }
+
+    function closeManageUsers() {
+      document.getElementById('manageUsersContainer').classList.add('hidden');
+      document.getElementById('userSelect').value = "";
+      document.getElementById('newUsername').value = "";
+      document.getElementById('newPassword').value = "";
+    }
+
+    document.getElementById('manageUsersForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const selectedUser = document.getElementById('userSelect').value;
+      const newUsername = document.getElementById('newUsername').value.trim();
+      const newPassword = document.getElementById('newPassword').value;
+
+      if (!selectedUser) {
+        alert("Veuillez sélectionner un utilisateur");
+        return;
+      }
+
+      if (!newUsername && !newPassword) {
+        alert("Veuillez entrer au moins un nouveau nom d'utilisateur ou mot de passe");
+        return;
+      }
+
+      const userData = APP_USERS[selectedUser];
+      if (newUsername && newUsername !== selectedUser) {
+        if (APP_USERS[newUsername]) {
+          alert("Ce nom d'utilisateur existe déjà");
+          return;
+        }
+        APP_USERS[newUsername] = userData;
+        delete APP_USERS[selectedUser];
+        if (localStorage.getItem('currentUser') === selectedUser) {
+          localStorage.setItem('currentUser', newUsername);
+        }
+      } else {
+        APP_USERS[selectedUser] = userData;
+      }
+
+      if (newPassword) {
+        APP_USERS[newUsername || selectedUser].password = newPassword;
+      }
+
+      saveUsers();
+      alert("Utilisateur modifié avec succès");
+      closeManageUsers();
+      location.reload();
+    });
+
+    // =============================================
+    // FONCTIONS EXISTANTES
+    // =============================================
+    function formatNumber(number) {
+      return Number(number).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatNumberPDF(number) {
+      return Number(number).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\s/g, '.');
+    }
+
+    function getJourSemaine(dateString) {
+      const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+      const date = new Date(dateString);
+      return days[date.getDay()];
+    }
+
+    function getMois(dateString) {
+      const date = new Date(dateString);
+      return moisList[date.getMonth()];
+    }
+
+    // Fonction fanampiny ho an'ny formatage real-time
+    function formatInputLive(input) {
+      const cursorPosition = input.selectionStart;
+      let value = input.value.replace(/[^\d.,]/g, ''); // Esorina ny tsy isa sy decimal
+      value = value.replace(',', '.'); // Hanova ny , ho .
+      
+      const parts = value.split('.');
+      const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      value = parts.length > 1 ? `${integerPart}.${parts[1].slice(0, 2)}` : integerPart;
+
+      input.value = value;
+
+      // Mametraka ny cursor eo amin'ny faran'ny texte rehefa vita ny formatage
+      const newPosition = value.length; // Mijanona eo amin'ny farany tanteraka
+      input.setSelectionRange(newPosition, newPosition);
+    }
+
+    function loadData() {
+      if (!checkPermission('view')) return;
+      
+      const moisSelect = document.getElementById("moisSelect").value;
+      const anneeInput = document.getElementById("anneeInput").value;
+      const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      const tbody = document.getElementById("journalBody");
+      tbody.innerHTML = "";
+
+      data.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      data.forEach(entry => {
+        const row = document.createElement("tr");
+
+        if (parseFloat(entry.montant) === 0) {
+          const fullCell = document.createElement("td");
+          fullCell.colSpan = 7;
+          fullCell.style.color = "red";
+          fullCell.style.fontWeight = "bold";
+          fullCell.textContent = `Tsy niasa - ${entry.date}`;
+          row.appendChild(fullCell);
+          tbody.appendChild(row);
+          return;
+        }
+
+        const dateCell = document.createElement("td");
+        const dateInput = document.createElement("input");
+        dateInput.type = "date";
+        dateInput.value = entry.date;
+        dateInput.readOnly = true;
+        dateCell.appendChild(dateInput);
+
+        const moisCell = document.createElement("td");
+        moisCell.textContent = getMois(entry.date);
+
+        const jourCell = document.createElement("td");
+        jourCell.textContent = getJourSemaine(entry.date);
+
+        const montantCell = document.createElement("td");
+        const montantSpan = document.createElement("span");
+        if (parseFloat(entry.montant) === 0) {
+          montantSpan.textContent = "Tsy niasa";
+          montantSpan.style.color = "red";
+        } else {
+          montantSpan.textContent = formatNumber(entry.montant);
+        }
+
+        const autreRevenueCell = document.createElement("td");
+        const autreRevenueSpan = document.createElement("span");
+        if (parseFloat(entry.montant) === 0) {
+          autreRevenueSpan.textContent = "Tsy niasa";
+          autreRevenueSpan.style.color = "red";
+        } else {
+          autreRevenueSpan.textContent = formatNumber(entry.autreRevenue || 0);
+        }
+        autreRevenueCell.appendChild(autreRevenueSpan);
+        montantCell.appendChild(montantSpan);
+
+        const depenseCell = document.createElement("td");
+        const depenseContainer = document.createElement("div");
+        depenseContainer.className = "depense-container";
+        const depenseSpan = document.createElement("span");
+        depenseSpan.textContent = formatNumber(entry.depense || "0");
+        depenseContainer.appendChild(depenseSpan);
+        if (entry.libelle) {
+          const libelleSpan = document.createElement("span");
+          libelleSpan.textContent = " - " + entry.libelle;
+          depenseContainer.appendChild(libelleSpan);
+        }
+        depenseCell.appendChild(depenseContainer);
+
+        const actionCell = document.createElement("td");
+        actionCell.textContent = "Enregistré";
+
+        row.appendChild(dateCell);
+        row.appendChild(moisCell);
+        row.appendChild(jourCell);
+        row.appendChild(montantCell);
+      row.appendChild(autreRevenueCell);
+        row.appendChild(autreRevenueCell);
+        row.appendChild(depenseCell);
+        row.appendChild(actionCell);
+
+        tbody.appendChild(row);
+      });
+
+      updateTotal();
+      updateCumulativePercent10();
+      updateTotalVola();
+      updateTotalVola2();
+    }
+
+    function changeMonth() {
+      if (!checkPermission('view')) return;
+      loadData();
+    }
+
+    
+function dateDiffInDays(date1, date2) {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  const diffTime = d2 - d1;
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function insertFermetureIfNeeded(lastDate, newDate, tbody) {
+  const diff = dateDiffInDays(lastDate, newDate);
+  console.log("Diff entre " + lastDate + " et " + newDate + " = " + diff + " jours");
+  if (diff > 1) {
+    for (let i = 1; i < diff; i++) {
+      const fermetureDate = new Date(lastDate);
+      fermetureDate.setDate(fermetureDate.getDate() + i);
+      const iso = fermetureDate.toISOString().split('T')[0];
+      console.log("Ajout auto date fermée : " + iso);
+
+      const row = document.createElement("tr");
+
+      const dateCell = document.createElement("td");
+      const dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.value = iso;
+      dateInput.readOnly = true;
+      dateCell.appendChild(dateInput);
+
+      const moisCell = document.createElement("td");
+      moisCell.textContent = getMois(iso);
+
+      const jourCell = document.createElement("td");
+      jourCell.textContent = getJourSemaine(iso);
+
+      const montantCell = document.createElement("td");
+      montantCell.textContent = formatNumber(0);
+
+      const autreRevenueCell = document.createElement("td");
+      autreRevenueCell.textContent = formatNumber(0);
+
+      const depenseCell = document.createElement("td");
+      const span = document.createElement("span");
+      span.textContent = "0 - Tsy niasa";
+      span.style.color = "red";
+      depenseCell.appendChild(span);
+
+      const actionCell = document.createElement("td");
+      actionCell.textContent = "Auto";
+
+      row.appendChild(dateCell);
+      row.appendChild(moisCell);
+      row.appendChild(jourCell);
+      row.appendChild(montantCell);
+      row.appendChild(autreRevenueCell);
+      row.appendChild(depenseCell);
+      row.appendChild(actionCell);
+
+      tbody.appendChild(row);
+
+      const moisSelect = document.getElementById("moisSelect").value;
+      const anneeInput = document.getElementById("anneeInput").value;
+      const key = "journal_caisse_" + anneeInput + "_" + moisSelect;
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      data.push({
+        date: iso,
+        montant: "0.00",
+        autreRevenue: "0.00",
+        depense: "0.00",
+        libelle: "Tsy niasa"
+      });
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+  }
+}
+
+function ajouterLigne() {
+      if (!checkPermission('add')) return;
+      
+      console.log("Ajout d'une nouvelle ligne...");
+      const tbody = document.getElementById("journalBody");
+      const row = document.createElement("tr");
+
+      const dateCell = document.createElement("td");
+      const dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.required = true;
+      
+      const moisSelect = document.getElementById("moisSelect").value;
+      const anneeInput = document.getElementById("anneeInput").value;
+      const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      
+      let nouvelleDate;
+      if (data.length > 0) {
+        insertFermetureIfNeeded(data[data.length - 1].date, nouvelleDate, tbody);
+        const derniereDate = new Date(data[data.length - 1].date);
+        derniereDate.setDate(derniereDate.getDate() + 1);
+        
+        if (derniereDate.getMonth() != moisSelect) {
+          alert("Efa tapitra tapitra ity volana ity. Ovao ny Volana etsy ambony raha ilaina.");
+          return;
+        }
+        
+        nouvelleDate = derniereDate.toISOString().split('T')[0];
+      } else {
+        nouvelleDate = `${anneeInput}-${String(parseInt(moisSelect) + 1).padStart(2, '0')}-01`;
+      }
+      
+      dateInput.value = nouvelleDate;
+      dateCell.appendChild(dateInput);
+
+      const moisCell = document.createElement("td");
+      moisCell.textContent = moisList[moisSelect];
+
+      const jourCell = document.createElement("td");
+      jourCell.textContent = getJourSemaine(nouvelleDate);
+
+      const montantCell = document.createElement("td");
+      const montantInput = document.createElement("input");
+
+      const autreRevenueCell = document.createElement("td");
+      const autreRevenueInput = document.createElement("input");
+      autreRevenueInput.type = "text";
+      autreRevenueInput.className = "number-input";
+      autreRevenueInput.value = " ";
+      autreRevenueInput.addEventListener('input', function() { formatInputLive(this); });
+      autreRevenueCell.appendChild(autreRevenueInput);
+      montantInput.type = "text";
+      montantInput.className = "number-input";
+      montantInput.required = true;
+      montantInput.addEventListener('input', function() { formatInputLive(this); });
+      montantCell.appendChild(montantInput);
+
+      const depenseCell = document.createElement("td");
+      const depenseContainer = document.createElement("div");
+      depenseContainer.className = "depense-container";
+      const depenseInput = document.createElement("input");
+      depenseInput.type = "text";
+      depenseInput.className = "number-input";
+      depenseInput.value = " ";
+      depenseInput.addEventListener('input', function() { formatInputLive(this); });
+      depenseContainer.appendChild(depenseInput);
+      const libelleInput = document.createElement("input");
+      libelleInput.type = "text";
+      libelleInput.placeholder=" Votre Libellé";
+      depenseContainer.appendChild(libelleInput);
+      depenseCell.appendChild(depenseContainer);
+
+      const actionCell = document.createElement("td");
+      const saveButton = document.createElement("button");
+      saveButton.textContent = "Enregistrer";
+      saveButton.onclick = () => enregistrerLigne(row);
+      actionCell.appendChild(saveButton);
+
+      row.appendChild(dateCell);
+      row.appendChild(moisCell);
+      row.appendChild(jourCell);
+      row.appendChild(montantCell);
+      row.appendChild(autreRevenueCell);
+        row.appendChild(autreRevenueCell);
+      row.appendChild(depenseCell);
+      row.appendChild(actionCell);
+
+      tbody.appendChild(row);
+      
+      dateInput.addEventListener('change', function() {
+        jourCell.textContent = getJourSemaine(this.value);
+        moisCell.textContent = getMois(this.value);
+      });
+
+      montantInput.focus();
+    }
+
+    function enregistrerLigne(row) {
+  if (!checkPermission('add')) return;
+
+  console.log("Enregistrement d'une ligne...");
+  const dateInput = row.querySelector('input[type="date"]');
+  const montantInput = row.querySelector('td:nth-child(4) input[type="text"]');
+  const autreRevenueInput = row.querySelector('td:nth-child(5) input[type="text"]');
+  const depenseContainer = row.querySelector('.depense-container');
+  const depenseInput = depenseContainer.querySelector('input[type="text"].number-input');
+  const libelleInput = depenseContainer.querySelector('input[type="text"]:not(.number-input)');
+  const actionCell = row.querySelector('td:last-child');
+
+  const montantValue = parseFloat(montantInput.value.replace(/\s/g, '').replace(',', '.'));
+  const autreRevenueValue = parseFloat(autreRevenueInput.value.replace(/\s/g, '').replace(',', '.')) || 0;
+  const depenseValue = parseFloat(depenseInput.value.replace(/\s/g, '').replace(',', '.')) || 0;
+
+  if (!dateInput.value || !montantInput.value) {
+    alert("Veuillez saisir une date et un montant.");
+    return;
+  }
+
+  if (montantValue <= 0) {
+    const confirmer = confirm("Tsy misy vola na 0 Ar. Tianao ve hametraka an'io daty io ho 'Tsy niasa'?");
+    if (confirmer) {
+      const moisSelect = document.getElementById("moisSelect").value;
+      const anneeInput = document.getElementById("anneeInput").value;
+      const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+
+      const newEntry = {
+        date: dateInput.value,
+        montant: "0.00",
+        autreRevenue: autreRevenueValue.toFixed(2),
+        depense: "0.00",
+        libelle: "Tsy niasa"
+      };
+
+      data.push(newEntry);
+      localStorage.setItem(key, JSON.stringify(data));
+      loadData();
+    }
+    return;
+  }
+
+  const moisSelect = document.getElementById("moisSelect").value;
+  const anneeInput = document.getElementById("anneeInput").value;
+  const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+  const data = JSON.parse(localStorage.getItem(key) || "[]");
+
+  if (data.some(entry => entry.date === dateInput.value)) {
+    alert("Cette date existe déjà dans le journal.");
+    return;
+  }
+
+  const dateMonth = new Date(dateInput.value).getMonth();
+  if (dateMonth != moisSelect) {
+    if (!confirm("Attention: Cette date n'appartient pas au mois sélectionné. Voulez-vous quand même l'ajouter?")) {
+      return;
+    }
+  }
+
+  const newEntry = {
+    date: dateInput.value,
+    montant: montantValue.toFixed(2),
+    autreRevenue: autreRevenueValue.toFixed(2),
+    depense: depenseValue.toFixed(2)
+  };
+  if (libelleInput.value) {
+    newEntry.libelle = libelleInput.value;
+  }
+
+  data.push(newEntry);
+  localStorage.setItem(key, JSON.stringify(data));
+
+  dateInput.readOnly = true;
+  const montantSpan = document.createElement("span");
+  montantSpan.textContent = formatNumber(montantValue);
+
+  const autreRevenueSpan = document.createElement("span");
+  autreRevenueSpan.textContent = formatNumber(autreRevenueValue);
+  autreRevenueInput.parentNode.replaceChild(autreRevenueSpan, autreRevenueInput);
+  montantInput.parentNode.replaceChild(montantSpan, montantInput);
+
+  const depenseSpan = document.createElement("span");
+  depenseSpan.textContent = formatNumber(depenseValue || "0");
+  depenseInput.parentNode.replaceChild(depenseSpan, depenseInput);
+
+  if (libelleInput.value) {
+    const libelleSpan = document.createElement("span");
+    libelleSpan.textContent = " - " + libelleInput.value;
+    depenseContainer.appendChild(libelleSpan);
+    depenseContainer.removeChild(libelleInput);
+  } else {
+    depenseContainer.removeChild(libelleInput);
+  }
+  actionCell.innerHTML = "Enregistré";
+
+  updateTotal();
+  updateCumulativePercent10();
+  updateTotalVola();
+  updateTotalVola2();
+}
+
+    function updateTotal() {
+      const moisSelect = document.getElementById("moisSelect").value;
+      const anneeInput = document.getElementById("anneeInput").value;
+      const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+      const total = data.reduce((sum, entry) => sum + parseFloat(entry.montant || 0), 0);
+      const totalAutre = data.reduce((sum, entry) => sum + parseFloat(entry.autreRevenue || 0), 0);
+      const totalDepense = data.reduce((sum, entry) => sum + parseFloat(entry.depense || 0), 0);
+      document.getElementById("totalCell").textContent = formatNumber(total);
+      document.getElementById("totalAutreRevenue").textContent = formatNumber(totalAutre);
+      document.getElementById("totalDepense").textContent = formatNumber(totalDepense);
+
+      document.getElementById("percent30").textContent = formatNumber(total * 0.30);
+      document.getElementById("percent30Second").textContent = formatNumber(total * 0.30);
+      document.getElementById("percent15").textContent = formatNumber(total * 0.15);
+      document.getElementById("percent15Second").textContent = formatNumber(total * 0.15);
+      document.getElementById("percent10").textContent = formatNumber(total * 0.10);
+    }
+
+    function updateCumulativePercent10() {
+      const moisSelect = parseInt(document.getElementById("moisSelect").value);
+      const anneeInput = document.getElementById("anneeInput").value;
+      let totalPercent10 = 0;
+
+      for (let i = 0; i <= moisSelect; i++) {
+        const key = STORAGE_KEY_PREFIX + anneeInput + "_" + i;
+        const data = JSON.parse(localStorage.getItem(key) || "[]");
+        const total = data.reduce((sum, entry) => sum + parseFloat(entry.montant || 0), 0);
+      const totalAutre = data.reduce((sum, entry) => sum + parseFloat(entry.autreRevenue || 0), 0);
+        totalPercent10 += total * 0.10;
+      }
+
+      document.getElementById("cumulativePercent10").textContent = formatNumber(totalPercent10);
+    }
+
+    function updateTotalVola() {
+      const moisSelect = document.getElementById("moisSelect").value;
+      const anneeInput = document.getElementById("anneeInput").value;
+      const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+      const data = JSON.parse(localStorage.getItem(key) || "[]");
+
+      const totalMontant = data.reduce((sum, entry) => sum + parseFloat(entry.montant || 0), 0);
+      const totalDepense = data.reduce((sum, entry) => sum + parseFloat(entry.depense || 0), 0);
+      const totalVola = (totalMontant * 0.30) - totalDepense;
+
+      document.getElementById("totalVola").textContent = formatNumber(totalVola);
+    }
+
+    function updateTotalVola2() {
+      const moisSelect = parseInt(document.getElementById("moisSelect").value);
+      const anneeInput = document.getElementById("anneeInput").value;
+      let totalVola2 = 0;
+
+      for (let i = 0; i <= moisSelect; i++) {
+        const key = STORAGE_KEY_PREFIX + anneeInput + "_" + i;
+        const data = JSON.parse(localStorage.getItem(key) || "[]");
+        const totalMontant = data.reduce((sum, entry) => sum + parseFloat(entry.montant || 0), 0);
+        const totalDepense = data.reduce((sum, entry) => sum + parseFloat(entry.depense || 0), 0);
+        const totalVola = (totalMontant * 0.30) - totalDepense;
+        totalVola2 += totalVola;
+      }
+
+      document.getElementById("totalVola2").textContent = formatNumber(totalVola2);
+    }
+
+    function enregistrerPDF() {
+      if (!checkPermission('export')) return;
+
+      console.log("Tentative d'enregistrement en PDF...");
+      const { jsPDF } = window.jspdf;
+      if (!jsPDF || !window.jspdf) {
+        alert("Erreur: jsPDF n'est pas chargé. Vérifiez votre connexion Internet.");
+        return;
+      }
+
+      try {
+        const doc = new jsPDF();
+        const moisSelect = document.getElementById("moisSelect").value;
+        const anneeInput = document.getElementById("anneeInput").value;
+        const moisNom = moisList[moisSelect];
+        const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+        const data = JSON.parse(localStorage.getItem(key) || "[]");
+
+        doc.setFontSize(18);
+        doc.text(`Journal U-G - ${moisNom} ${anneeInput}`, 14, 15);
+        doc.setFontSize(12);
+
+        const tableData = data.map(entry => [
+          entry.date,
+          getJourSemaine(entry.date),
+          `${formatNumberPDF(entry.montant)} Ar`,
+          `${formatNumberPDF(entry.depense || 0)} Ar${entry.libelle ? " - " + entry.libelle : ""}`
+        ]);
+
+        const total = data.reduce((sum, entry) => sum + parseFloat(entry.montant), 0);
+        const totalDepense = data.reduce((sum, entry) => sum + parseFloat(entry.depense || 0), 0);
+        tableData.push(["TOTAL", "", `${formatNumberPDF(total)} Ar`, `${formatNumberPDF(totalDepense)} Ar`]);
+
+        doc.autoTable({
+          startY: 25,
+          head: [['Date', 'Jour', 'Revenue', 'Depense']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: { fillColor: [76, 175, 80] },
+          styles: { cellPadding: 3, fontSize: 10 },
+          columnStyles: {
+            2: { halign: 'right' },
+            3: { halign: 'right' }
+          }
+        });
+
+        let yPos = doc.lastAutoTable.finalY + 10;
+        doc.text("Repartition (Fizarana):", 14, yPos);
+        yPos += 7;
+        doc.text(` Jeux 30%: ${formatNumberPDF(total * 0.30)} Ar`, 14, yPos);
+        yPos += 7;
+        doc.text(` Poussy 30%: ${formatNumberPDF(total * 0.30)} Ar`, 14, yPos);
+        yPos += 7;
+        doc.text(`Samba et Santatra 15%: ${formatNumberPDF(total * 0.15)} Ar`, 14, yPos);
+        yPos += 7;
+        doc.text(`10%: ${formatNumberPDF(total * 0.10)} Ar`, 14, yPos);
+
+        const totalPercent10 = parseFloat(document.getElementById("cumulativePercent10").textContent.replace(/\s/g, '')) || 0;
+        yPos += 7;
+        doc.text(`Total 10% : ${formatNumberPDF(totalPercent10)} Ar`, 14, yPos);
+
+        const totalVola = parseFloat(document.getElementById("totalVola").textContent.replace(/\s/g, '')) || 0;
+        yPos += 7;
+        doc.text(`Vola Jeux Reste de cette mois: ${formatNumberPDF(totalVola)} Ar`, 14, yPos);
+
+        const totalVola2 = parseFloat(document.getElementById("totalVola2").textContent.replace(/\s/g, '')) || 0;
+        yPos += 7;
+        doc.text(`Total Vola Jeux Restant: ${formatNumberPDF(totalVola2)} Ar`, 14, yPos);
+
+        doc.save(`Journal_Caisse_${moisNom}_${anneeInput}.pdf`);
+        console.log("PDF généré avec succès.");
+      } catch (e) {
+        console.error("Erreur lors de la génération du PDF:", e);
+        alert("Erreur lors de la génération du PDF: " + e.message);
+      }
+    }
+
+    function imprimer() {
+      if (!checkPermission('print')) return;
+      console.log("Tentative d'impression...");
+      window.print();
+    }
+
+    function restaurerCompte() {
+      if (!checkPermission('restore')) return;
+      
+      console.log("Restauration des données...");
+      const restoreCode = "1234"; // Kaody tsotra ho fanamarinana (azo ovaina)
+      const userInput = prompt("Ampidiro ny kaody hanamarinana ny famerenana (restoration):");
+
+      if (userInput === restoreCode) {
+        if (confirm("Ho Restorena tokoa ve? Voafafa daholo izay Donnée rehetra amin'ity volana ity raha toa ka Eny.")) {
+          const moisSelect = document.getElementById("moisSelect").value;
+          const anneeInput = document.getElementById("anneeInput").value;
+          const key = STORAGE_KEY_PREFIX + anneeInput + "_" + moisSelect;
+          
+          localStorage.removeItem(key);
+          loadData();
+          
+          showSuccessModal();
+        }
+      } else {
+        alert("😈 Kaody tsy marina e! Tsy azo atao ny restoration.");
+      }
+    }
+  </script>
+
+<script>
+  // Add smoke effect when clicking the "Jour Suivant" button
+  document.addEventListener('DOMContentLoaded', () => {
+    const jourBtn = document.querySelector('button.perimeter-effect[onclick="ajouterLigne()"]');
+    if (jourBtn) {
+      jourBtn.addEventListener('click', () => {
+        jourBtn.classList.add('smoke');
+        setTimeout(() => jourBtn.classList.remove('smoke'), 600);
+      });
+    }
+  });
+</script>
+
+
+<!-- Custom Modal -->
+<div id="successModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
+  <canvas id="fireworksCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0;"></canvas>
+  <div style="background:white; padding:20px 30px; border-radius:10px; z-index:1; text-align:center; font-size:20px; color:#2e7d32; box-shadow:0 0 20px rgba(255,255,255,0.4);">
+    <strong class="flash-text">Tanteraka ny sitraponao!</strong><br><br>
+    <button onclick="closeSuccessModal()" style="margin-top:15px; padding:10px 20px; border:none; background:#4CAF50; color:white; font-weight:bold; border-radius:6px; font-size:16px;">OK</button>
+  </div>
+</div>
+<script>
+function showSuccessModal() {
+  const modal = document.getElementById('successModal');
+  modal.style.display = 'flex';
+  document.getElementById('fireworksSound').play();
+
+  const canvas = document.getElementById('fireworksCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: Math.random() * 3 + 2,
+      color: 'hsl(' + Math.random() * 360 + ', 100%, 60%)',
+      angle: Math.random() * 2 * Math.PI,
+      speed: Math.random() * 5 + 2,
+      alpha: 1
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      p.x += Math.cos(p.angle) * p.speed;
+      p.y += Math.sin(p.angle) * p.speed;
+      p.alpha -= 0.01;
+    });
+    if (particles.some(p => p.alpha > 0)) {
+      requestAnimationFrame(animate);
+    }
+  }
+  animate();
+  setTimeout(closeSuccessModal, 5000);
+}
+
+function closeSuccessModal() {
+  const modal = document.getElementById('successModal');
+  modal.style.display = 'none';
+}
+</script>
+
+</body>
+</html>
